@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>M1cro | System Access</title>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --secondary: #003300;
+            --bg: #0a0a0a;
+            --shadow: rgba(0, 255, 65, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Анимированный фон (сетка) */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 200%; height: 200%;
+            background-image: 
+                linear-gradient(var(--secondary) 1px, transparent 1px),
+                linear-gradient(90deg, var(--secondary) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: center;
+            transform: perspective(500px) rotateX(60deg) translateY(-10%);
+            animation: grid-move 20s linear infinite;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        @keyframes grid-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 50px; }
+        }
+
+        /* Контейнер терминала */
+        .terminal {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 800px;
+            background: rgba(5, 5, 5, 0.9);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 40px var(--shadow);
+            border-radius: 8px;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Шапка окна */
+        .terminal-header {
+            background: var(--primary);
+            color: var(--bg);
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid var(--bg);
+        }
+
+        /* Контент */
+        .terminal-body {
+            padding: 25px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--primary);
+            letter-spacing: 4px;
+        }
+
+        .text-block {
+            line-height: 1.6;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            background: var(--primary);
+            color: var(--bg);
+            padding: 0 4px;
+            font-weight: bold;
+        }
+
+        /* Кнопки/Ссылки */
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            display: block;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            font-weight: bold;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: var(--bg);
+            box-shadow: 0 0 20px var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Эффект печати */
+        .typing {
+            display: inline-block;
+            border-right: 8px solid var(--primary);
+            animation: blink 0.7s infinite step-end;
+            padding-right: 5px;
+            margin-bottom: 15px;
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary) }
+        }
+
+        /* Помехи (Scanline) */
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 11;
+            background: linear-gradient(0deg, rgba(0, 255, 65, 0) 0%, rgba(0, 255, 65, 0.1) 50%, rgba(0, 255, 65, 0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+            animation: scanline 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100%; }
+        }
+
+        /* Моб. адаптация */
+        @media (max-width: 600px) {
+            .terminal { width: 95%; }
+            .terminal-body { padding: 15px; }
+            .text-block { font-size: 0.95rem; }
+            h1 { letter-spacing: 2px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="terminal">
+    <div class="terminal-header">
+        <span>ROOT@M1CRO: ~</span>
+        <div class="window-controls">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot" style="background: var(--bg);"></div>
+        </div>
+    </div>
+
+    <div class="terminal-body">
+        <div class="typing" id="typed-text"></div>
+        
+        <h1>M1CRO</h1>
+
+        <div class="text-block">
+            <p>> Я занимаюсь архитектурой кода и исследованием систем. В моем арсенале разработка <span class="highlight">полезного софта</span> для оптимизации и <span class="highlight">вредоносного ПО</span> для анализа безопасности.</p>
+            <br>
+            <p>> Основные инструменты: <strong>Python</strong> и <strong>Bash</strong>. Мой интерес выходит за рамки кода — я изучаю «железо» ПК и мобильных устройств, разбирая их до основания.</p>
+        </div>
+
+        <div class="nav-links">
+            <a href="https://t.me/M1croOfficial" target="_blank" class="btn">TELEGRAM КАНАЛ</a>
+            <a href="https://www.tiktok.com/@m1crotg?is_from_webapp=1&sender_device=pc" target="_blank" class="btn">TIKTOK ПРОФИЛЬ</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const text = "ИНИЦИАЛИЗАЦИЯ... ДОСТУП ПОЛУЧЕН.";
+    let i = 0;
+    const speed = 70;
+
+    function typeWriter() {
+        if (i < text.length) {
+            document.getElementById("typed-text").innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typeWriter, speed);
+        }
+    }
+    window.onload = typeWriter;
+</script>
+
+</body>
+</html>

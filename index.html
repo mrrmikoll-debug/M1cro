@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>M1CRO | CORE</title>
+    <title>M1CRO | ACCESS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
         :root {
             --neon: #00ff41;
-            --neon-dim: rgba(0, 255, 65, 0.15);
+            --neon-dim: rgba(0,255,65,0.15);
+            --neon-faint: rgba(0,255,65,0.04);
             --bg: #010101;
+            --pad: clamp(18px, 5vw, 38px);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
+        *, *::before, *::after {
+            margin: 0; padding: 0;
             box-sizing: border-box;
             font-family: 'Share Tech Mono', monospace;
-            -webkit-tap-highlight-color: transparent;
         }
 
+        html { height: 100%; }
+
         body {
-            background-color: var(--bg);
+            background: var(--bg);
             color: var(--neon);
-            height: 100dvh; /* Динамическая высота для мобилок */
+            min-height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -32,200 +35,380 @@
             position: relative;
         }
 
-        /* GPU-ускоренная сетка */
-        .bg-container {
+        #bg-canvas {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            inset: 0;
             z-index: 1;
-            perspective: 1000px;
+            opacity: 0.85;
+        }
+
+        /* ── Vignette + scanlines ── */
+        .vignette {
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 50% 40%, transparent 25%, #000 90%);
+            z-index: 2; pointer-events: none;
+        }
+        .scanlines {
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.18) 2px,
+                rgba(0,0,0,0.18) 4px
+            );
+            z-index: 3; pointer-events: none;
+        }
+
+        /* ── Main card ── */
+        .main-frame {
+            position: relative; z-index: 10;
+            width: 94%; max-width: 740px;
+            background: rgba(0,0,0,0.97);
+            border: 1px solid rgba(0,255,65,0.5);
+            padding: var(--pad);
+            box-shadow:
+                0 0 0 1px rgba(0,255,65,0.08),
+                0 0 40px rgba(0,255,65,0.12),
+                inset 0 0 60px rgba(0,255,65,0.02);
             overflow: hidden;
         }
 
-        .bg-grid {
+        /* corner accents */
+        .main-frame::before,
+        .main-frame::after {
+            content: '';
             position: absolute;
-            width: 200%; height: 200%;
-            top: -50%; left: -50%;
-            background-image: 
-                linear-gradient(var(--neon-dim) 1px, transparent 1px),
-                linear-gradient(90deg, var(--neon-dim) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: rotateX(60deg);
-            animation: gridScroll 12s linear infinite;
+            width: 16px; height: 16px;
+            border-color: var(--neon);
+            border-style: solid;
+        }
+        .main-frame::before {
+            top: -1px; left: -1px;
+            border-width: 2px 0 0 2px;
+        }
+        .main-frame::after {
+            bottom: -1px; right: -1px;
+            border-width: 0 2px 2px 0;
         }
 
-        @keyframes gridScroll {
-            from { transform: rotateX(60deg) translateY(0); }
-            to { transform: rotateX(60deg) translateY(40px); }
-        }
-
-        .vignette {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 30%, #000 120%);
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        /* Основная рама */
-        .main-frame {
-            position: relative;
-            z-index: 10;
-            width: 94%;
-            max-width: 800px;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--neon);
-            padding: clamp(15px, 5vw, 35px);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
-            animation: bootUp 0.6s ease-out;
-        }
-
-        @keyframes bootUp {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
+        /* ── Header row ── */
         .header-info {
             display: flex;
             justify-content: space-between;
-            font-size: 10px;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--neon-dim);
-            padding-bottom: 8px;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: clamp(9px, 2.2vw, 11px);
+            border-bottom: 1px solid rgba(0,255,65,0.2);
+            padding-bottom: 12px;
+            margin-bottom: 22px;
+            letter-spacing: 1.5px;
+            opacity: 0.75;
         }
+        #st { color: var(--neon); opacity: 1; }
 
+        /* ── Title ── */
         h1 {
-            font-size: clamp(2rem, 12vw, 4rem);
+            font-size: clamp(2.8rem, 14vw, 5rem);
             text-align: center;
-            letter-spacing: clamp(5px, 3vw, 15px);
-            margin-bottom: 25px;
-            text-shadow: 0 0 10px var(--neon);
-            position: relative;
+            letter-spacing: clamp(6px, 3vw, 18px);
+            margin-bottom: 28px;
+            text-shadow:
+                0 0 8px var(--neon),
+                0 0 30px rgba(0,255,65,0.4),
+                0 0 60px rgba(0,255,65,0.15);
+            animation: flicker 6s infinite;
+        }
+        @keyframes flicker {
+            0%,92%,96%,100% { opacity: 1; }
+            93%   { opacity: 0.85; }
+            95%   { opacity: 0.6; }
+            97%   { opacity: 0.9; }
         }
 
-        /* Контентный бокс */
+        /* ── Terminal block ── */
         .terminal-box {
             border-left: 2px solid var(--neon);
-            padding-left: 15px;
-            margin-bottom: 25px;
-            background: rgba(0, 255, 65, 0.02);
+            padding: 14px 18px;
+            margin-bottom: 28px;
+            background: var(--neon-faint);
+            position: relative;
         }
-
+        .terminal-box::before {
+            content: 'PROFILE.SYS';
+            position: absolute;
+            top: -9px; left: 14px;
+            font-size: 9px;
+            background: #010101;
+            padding: 0 6px;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
         .terminal-box p {
-            font-size: clamp(0.85rem, 4vw, 1rem);
-            line-height: 1.5;
-            margin-bottom: 10px;
+            font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+            line-height: 1.75;
+            margin-bottom: 4px;
         }
+        .terminal-box p:last-child { margin-bottom: 0; }
 
-        .highlight {
+        .hl {
             background: var(--neon);
             color: #000;
-            padding: 0 4px;
+            padding: 1px 6px;
             font-weight: bold;
         }
 
-        /* Сетка навыков */
-        .skills-grid {
+        /* ── Skills ── */
+        .skills-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 30px;
             margin-bottom: 30px;
         }
 
-        .skill-item { font-size: 11px; }
-
-        .progress-container {
-            width: 100%;
-            height: 4px;
-            background: rgba(0, 255, 65, 0.1);
-            margin-top: 6px;
+        .skill-item {
+            font-size: clamp(9px, 2.5vw, 11px);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
+        .skill-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 7px;
+        }
+        .skill-pct { opacity: 0.5; font-size: 10px; }
 
-        .progress-fill {
+        .bar-bg {
+            width: 100%; height: 5px;
+            background: rgba(0,255,65,0.08);
+            border: 1px solid rgba(0,255,65,0.18);
+            overflow: hidden;
+        }
+        .bar-fill {
             height: 100%;
-            background: var(--neon);
-            box-shadow: 0 0 8px var(--neon);
-            transition: width 1s ease-in-out;
+            background: linear-gradient(90deg, rgba(0,255,65,0.6), var(--neon));
+            box-shadow: 0 0 10px var(--neon), 0 0 20px rgba(0,255,65,0.4);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: barGrow 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
         }
+        @keyframes barGrow {
+            to { transform: scaleX(1); }
+        }
+        /* staggered delays */
+        .skill-item:nth-child(1) .bar-fill { animation-delay: 0.1s; }
+        .skill-item:nth-child(2) .bar-fill { animation-delay: 0.25s; }
+        .skill-item:nth-child(3) .bar-fill { animation-delay: 0.4s; }
+        .skill-item:nth-child(4) .bar-fill { animation-delay: 0.55s; }
 
-        /* Кнопки */
-        .action-area {
+        /* ── Buttons ── */
+        .action-btns {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
 
         .btn {
             text-decoration: none;
             color: var(--neon);
-            border: 1px solid var(--neon);
-            padding: 14px;
+            border: 1px solid rgba(0,255,65,0.45);
+            padding: clamp(12px, 3.5vw, 18px) 10px;
             text-align: center;
-            font-size: 13px;
+            font-size: clamp(12px, 3vw, 14px);
             font-weight: bold;
-            transition: 0.3s;
+            letter-spacing: 2px;
             text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            transition: color 0.25s, border-color 0.25s, box-shadow 0.25s;
         }
-
-        .btn:hover, .btn:active {
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             background: var(--neon);
+            transform: translateX(-105%);
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            z-index: 0;
+        }
+        .btn span { position: relative; z-index: 1; }
+
+        .btn:hover {
             color: #000;
-            box-shadow: 0 0 20px var(--neon);
+            border-color: var(--neon);
+            box-shadow: 0 0 25px rgba(0,255,65,0.5), inset 0 0 10px rgba(0,255,65,0.1);
+        }
+        .btn:hover::before { transform: translateX(0); }
+
+        /* ── Footer line ── */
+        .footer-line {
+            margin-top: 22px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0,255,65,0.12);
+            font-size: 9px;
+            letter-spacing: 2px;
+            opacity: 0.3;
+            text-align: center;
         }
 
-        /* Мобильная адаптация */
-        @media (max-width: 480px) {
-            .action-area { grid-template-columns: 1fr; }
-            .header-info { font-size: 8px; }
-            .skills-grid { grid-template-columns: 1fr 1fr; }
+        /* ── Responsive ── */
+        @media (max-width: 500px) {
+            .skills-container,
+            .action-btns {
+                grid-template-columns: 1fr;
+            }
+            h1 { letter-spacing: 8px; }
+        }
+
+        @media (max-width: 360px) {
+            h1 { font-size: 2.2rem; }
+        }
+
+        /* reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            h1, .bar-fill { animation: none; }
+            .bar-fill { transform: scaleX(1); }
+            .btn::before { transition: none; }
+            #bg-canvas { display: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="bg-container"><div class="bg-grid"></div></div>
-<div class="vignette"></div>
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
 
-<div class="main-frame">
+<main class="main-frame">
     <div class="header-info">
-        <span>BAKU_AZ</span>
-        <span id="status">STATUS: OK</span>
+        <span>LOC: BAKU, AZERBAIJAN</span>
+        <span id="st">STATUS: ROOT_ACTIVE</span>
     </div>
 
     <h1>M1CRO</h1>
 
     <div class="terminal-box">
-        <p>> Исследую архитектуру кода. Основной стек: <span class="highlight">Python</span> & <span class="highlight">Bash</span>.</p>
-        <p>> Специализация: <span class="highlight">System Optimization</span> и аудит безопасности ПО.</p>
-        <p>> Работа с железом и низкоуровневым софтом.</p>
+        <p>> Создаю вредоносное ПО и полезные программы.</p>
+        <p>> Программирую на <span class="hl">Python</span> и <span class="hl">Batch</span>.</p>
+        <p>> Умею работать с системами: <span class="hl">Windows, Linux, iOS, Android</span>.</p>
     </div>
 
-    <div class="skills-grid">
-        <div class="skill-item">PYTHON / BASH <div class="progress-container"><div class="progress-fill" style="width: 94%;"></div></div></div>
-        <div class="skill-item">SECURITY <div class="progress-container"><div class="progress-fill" style="width: 89%;"></div></div></div>
-        <div class="skill-item">OPTIMIZATION <div class="progress-container"><div class="progress-fill" style="width: 96%;"></div></div></div>
-        <div class="skill-item">HARDWARE <div class="progress-container"><div class="progress-fill" style="width: 91%;"></div></div></div>
+    <div class="skills-container">
+        <div class="skill-item">
+            <div class="skill-label">
+                <span>Прошивка устройств</span>
+                <span class="skill-pct">100%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="skill-item">
+            <div class="skill-label">
+                <span>Работа с ОС (WIN/LIN/iOS/AND)</span>
+                <span class="skill-pct">96%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width:96%"></div></div>
+        </div>
+        <div class="skill-item">
+            <div class="skill-label">
+                <span>Кодинг (Python / Batch)</span>
+                <span class="skill-pct">92%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width:92%"></div></div>
+        </div>
+        <div class="skill-item">
+            <div class="skill-label">
+                <span>Анализ и обход защиты</span>
+                <span class="skill-pct">88%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width:88%"></div></div>
+        </div>
     </div>
 
-    <div class="action-area">
-        <a href="https://t.me/M1croOfficial" target="_blank" class="btn">Telegram</a>
-        <a href="https://www.tiktok.com/@m1crotg" target="_blank" class="btn">TikTok</a>
+    <div class="action-btns">
+        <a href="https://t.me/M1croOfficial" target="_blank" rel="noopener noreferrer" class="btn"><span>Telegram</span></a>
+        <a href="https://www.tiktok.com/@m1crotg" target="_blank" rel="noopener noreferrer" class="btn"><span>TikTok</span></a>
     </div>
-</div>
+
+    <div class="footer-line">[ ENCRYPTED · SECURE · v2.0 ]</div>
+</main>
 
 <script>
-    const status = document.getElementById('status');
-    const logs = ["LINK: ESTABLISHED", "ENCRYPTION: AES-256", "IDENTITY: M1CRO"];
-    let i = 0;
+    /* ── Status cycling ── */
+    const st = document.getElementById('st');
+    const logs = ["STATUS: ROOT_ACTIVE","SYSTEM: SECURE","USER: M1CRO","ACCESS: GRANTED"];
+    let idx = 0;
+    function rotateSt() {
+        st.style.opacity = '0';
+        st.style.transition = 'opacity 0.25s';
+        setTimeout(() => {
+            idx = (idx + 1) % logs.length;
+            st.textContent = logs[idx];
+            st.style.opacity = '1';
+        }, 260);
+    }
+    setInterval(rotateSt, 2800);
 
-    setInterval(() => {
-        status.innerText = logs[i];
-        i = (i + 1) % logs.length;
-    }, 4000);
+    /* ── Matrix rain canvas ── */
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ#$%&<>[]{}ABCDEFabcdef'.split('');
+    const COL_W = 18;
+    let cols, drops, glows;
+
+    function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        cols  = Math.floor(canvas.width / COL_W);
+        drops = Array.from({length: cols}, () => Math.random() * -60 | 0);
+        glows = Array.from({length: cols}, () => Math.random() < 0.12);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let last = 0;
+    const INTERVAL = 55; /* ~18fps — low CPU */
+
+    function draw(ts) {
+        requestAnimationFrame(draw);
+        if (ts - last < INTERVAL) return;
+        last = ts;
+
+        /* fade trail */
+        ctx.fillStyle = 'rgba(1,1,1,0.18)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < cols; i++) {
+            const ch = CHARS[Math.random() * CHARS.length | 0];
+            const x  = i * COL_W;
+            const y  = drops[i] * COL_W;
+
+            if (glows[i]) {
+                /* bright leading char */
+                ctx.font = '13px "Share Tech Mono", monospace';
+                ctx.fillStyle = '#ccffe0';
+                ctx.shadowColor = '#00ff41';
+                ctx.shadowBlur  = 12;
+                ctx.fillText(ch, x, y);
+                ctx.shadowBlur  = 0;
+            } else {
+                /* normal green */
+                const alpha = 0.35 + Math.random() * 0.45;
+                ctx.fillStyle = `rgba(0,255,65,${alpha})`;
+                ctx.font = '12px "Share Tech Mono", monospace';
+                ctx.fillText(ch, x, y);
+            }
+
+            /* reset column */
+            if (y > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+                glows[i] = Math.random() < 0.12;
+            }
+            drops[i]++;
+        }
+    }
+    requestAnimationFrame(draw);
 </script>
-
 </body>
 </html>

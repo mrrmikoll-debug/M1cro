@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>M1CRO | ACCESS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,12 +22,15 @@
             box-sizing: border-box;
             font-family: 'Share Tech Mono', monospace;
             -webkit-tap-highlight-color: transparent;
+            /* Запрет выделения текста для защиты контента */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         html, body { 
             height: 100%; 
             width: 100%;
-            overflow: hidden; /* Предотвращает скролл на мобилках */
+            overflow: hidden;
             background: var(--bg);
         }
 
@@ -36,7 +40,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            touch-action: none; /* Оптимизация для тач-панелей */
+            touch-action: none;
         }
 
         #bg-canvas {
@@ -67,7 +71,7 @@
         .main-frame {
             position: relative; z-index: 10;
             width: 94%; max-width: 740px;
-            max-height: 95dvh; /* Чтобы не вылезало за экран на маленьких телефонах */
+            max-height: 95dvh;
             background: rgba(0,0,0,0.97);
             border: 1px solid rgba(0,255,65,0.5);
             padding: var(--pad);
@@ -75,7 +79,7 @@
                 0 0 0 1px rgba(0,255,65,0.08),
                 0 0 40px rgba(0,255,65,0.12),
                 inset 0 0 60px rgba(0,255,65,0.02);
-            overflow-y: auto; /* Внутренний скролл если контент не влез */
+            overflow-y: auto;
             scrollbar-width: none;
             will-change: transform;
         }
@@ -182,11 +186,6 @@
         }
         @keyframes barGrow { to { transform: scaleX(1); } }
 
-        .skill-item:nth-child(1) .bar-fill { animation-delay: 0.1s; }
-        .skill-item:nth-child(2) .bar-fill { animation-delay: 0.2s; }
-        .skill-item:nth-child(3) .bar-fill { animation-delay: 0.3s; }
-        .skill-item:nth-child(4) .bar-fill { animation-delay: 0.4s; }
-
         .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
         .btn {
@@ -229,17 +228,10 @@
         @media (max-width: 500px) {
             .skills-container, .action-btns { grid-template-columns: 1fr; }
             h1 { letter-spacing: 8px; margin-bottom: 20px; }
-            .header-info { justify-content: center; text-align: center; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            h1, .bar-fill { animation: none; }
-            .bar-fill { transform: scaleX(1); }
-            #bg-canvas { display: none; }
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;" onkeydown="return false;">
 
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 <div class="vignette" aria-hidden="true"></div>
@@ -254,9 +246,9 @@
     <h1>M1CRO</h1>
 
     <div class="terminal-box">
-        <p>> Создаю вредоносное ПО и полезные программы.</p>
+        <p>> Создаю полезное ПО и скрипты.</p>
         <p>> Программирую на <span class="hl">Python</span> и <span class="hl">Batch</span>.</p>
-        <p>> Умею работать с системами: <span class="hl">Windows, Linux, iOS, Android</span>.</p>
+        <p>> Системы: <span class="hl">Windows, Linux, iOS, Android</span>.</p>
     </div>
 
     <div class="skills-container">
@@ -287,69 +279,83 @@
 </main>
 
 <script>
-    /* ── Status cycling ── */
-    const st = document.getElementById('st');
-    const logs = ["STATUS: ROOT_ACTIVE","SYSTEM: SECURE","USER: M1CRO","ACCESS: GRANTED"];
-    let idx = 0;
-    function rotateSt() {
-        st.style.opacity = '0';
-        setTimeout(() => {
-            idx = (idx + 1) % logs.length;
-            st.textContent = logs[idx];
-            st.style.opacity = '1';
-        }, 250);
-    }
-    setInterval(rotateSt, 3000);
-
-    /* ── Matrix rain canvas (Optimized) ── */
-    const canvas = document.getElementById('bg-canvas');
-    const ctx = canvas.getContext('2d', { alpha: false }); // Оптимизация контекста
-
-    const CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ#$%&<>[]{}ABCDEF'.split('');
-    const COL_W = 20;
-    let cols, drops;
-
-    function resize() {
-        canvas.width  = window.innerWidth;
-        canvas.height = window.innerHeight;
-        cols = Math.floor(canvas.width / COL_W);
-        drops = Array(cols).fill(1).map(() => Math.random() * -50);
-    }
-
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resize, 200);
-    });
-    resize();
-
-    function draw() {
-        // Черный фон с альфой для эффекта шлейфа
-        ctx.fillStyle = 'rgba(1, 1, 1, 0.15)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.font = '14px "Share Tech Mono"';
-        
-        for (let i = 0; i < drops.length; i++) {
-            const text = CHARS[Math.floor(Math.random() * CHARS.length)];
-            const x = i * COL_W;
-            const y = drops[i] * COL_W;
-
-            // Рисуем символ
-            ctx.fillStyle = '#00ff41';
-            if (Math.random() > 0.95) ctx.fillStyle = '#fff'; // Вспышки
-            
-            ctx.fillText(text, x, y);
-
-            if (y > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
+    (function() {
+        /* 1. Защита от F12, Ctrl+Shift+I, Ctrl+U */
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode == 123 || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
+                (e.ctrlKey && e.keyCode == 85)) {
+                e.preventDefault();
+                return false;
             }
-            drops[i]++;
-        }
-    }
+        });
 
-    // Стабильный FPS для мобилок
-    setInterval(draw, 50);
+        /* 2. Зацикленный дебаггер (мешает копаться в коде через консоль) */
+        setInterval(function() {
+            (function(i) {
+                return (function(a) {
+                    return (function(b) {
+                        return (function(c) {
+                            debugger;
+                        })(a);
+                    })(i);
+                })(i);
+            })(0);
+        }, 1000);
+
+        /* 3. Очистка консоли при открытии */
+        setInterval(() => {
+            console.clear();
+            console.log("%cSTOP!", "color: red; font-size: 40px; font-weight: bold;");
+            console.log("%cProtected by M1CRO System", "color: #00ff41; font-size: 18px;");
+        }, 1500);
+
+        /* ── Логика сайта ── */
+        const st = document.getElementById('st');
+        const logs = ["STATUS: ROOT_ACTIVE","SYSTEM: SECURE","USER: M1CRO","ACCESS: GRANTED"];
+        let idx = 0;
+        function rotateSt() {
+            st.style.opacity = '0';
+            setTimeout(() => {
+                idx = (idx + 1) % logs.length;
+                st.textContent = logs[idx];
+                st.style.opacity = '1';
+            }, 250);
+        }
+        setInterval(rotateSt, 3000);
+
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        const CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ#$%&<>[]{}ABCDEF'.split('');
+        const COL_W = 20;
+        let cols, drops;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            cols = Math.floor(canvas.width / COL_W);
+            drops = Array(cols).fill(1).map(() => Math.random() * -50);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function draw() {
+            ctx.fillStyle = 'rgba(1, 1, 1, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '14px "Share Tech Mono"';
+            for (let i = 0; i < drops.length; i++) {
+                const text = CHARS[Math.floor(Math.random() * CHARS.length)];
+                const x = i * COL_W;
+                const y = drops[i] * COL_W;
+                ctx.fillStyle = '#00ff41';
+                if (Math.random() > 0.95) ctx.fillStyle = '#fff';
+                ctx.fillText(text, x, y);
+                if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 50);
+    })();
 </script>
 </body>
 </html>

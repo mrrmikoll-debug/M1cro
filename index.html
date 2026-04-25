@@ -2,360 +2,379 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline';">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>M1CRO | ACCESS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="no-referrer">
+    <title>M1CRO | BIO</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon: #00ff41;
-            --neon-dim: rgba(0,255,65,0.15);
-            --neon-faint: rgba(0,255,65,0.04);
-            --bg: #010101;
-            --pad: clamp(18px, 5vw, 38px);
+            --g:   #00ff41;
+            --gb:  #39ff14;
+            --gg:  rgba(0,255,65,0.5);
+            --gd:  rgba(0,255,65,0.1);
+            --cy:  #00e5ff;
+            --cyg: rgba(0,229,255,0.35);
+            --bg:  #010d01;
+            --cbg: rgba(0,10,0,0.9);
         }
-
         *, *::before, *::after {
-            margin: 0; padding: 0;
-            box-sizing: border-box;
-            font-family: 'Share Tech Mono', monospace;
-            -webkit-tap-highlight-color: transparent;
-            /* Запрет выделения текста для защиты контента */
-            user-select: none;
-            -webkit-user-select: none;
+            margin:0; padding:0; box-sizing:border-box;
+            -webkit-tap-highlight-color:transparent;
+            -webkit-touch-callout:none;
+            user-select:none; -webkit-user-select:none;
         }
-
-        html, body { 
-            height: 100%; 
-            width: 100%;
-            overflow: hidden;
-            background: var(--bg);
-        }
-
+        html, body { width:100%; height:100%; }
         body {
-            color: var(--neon);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            touch-action: none;
+            min-height:100svh;
+            display:flex; justify-content:center; align-items:center;
+            padding: env(safe-area-inset-top,12px) env(safe-area-inset-right,12px)
+                     env(safe-area-inset-bottom,12px) env(safe-area-inset-left,12px);
+            background:var(--bg);
+            color:var(--g);
+            font-family:'Share Tech Mono',monospace;
+            overflow:hidden;
+            overscroll-behavior:none;
+        }
+        #matrix {
+            position:fixed; inset:0;
+            width:100%; height:100%;
+            z-index:0; opacity:0.5; display:block;
+        }
+        .scan {
+            position:fixed; inset:0; z-index:1; pointer-events:none;
+            background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px);
+        }
+        .brk {
+            position:fixed; width:48px; height:48px; z-index:2; pointer-events:none;
+        }
+        .brk::before,.brk::after {
+            content:''; position:absolute; background:var(--gb); box-shadow:0 0 6px var(--gg);
+        }
+        .brk::before { width:2px; height:48px; top:0; left:0; }
+        .brk::after  { width:48px; height:2px; top:0; left:0; }
+        .brk-tl { top:14px; left:14px; }
+        .brk-tr { top:14px; right:14px; transform:scaleX(-1); }
+        .brk-bl { bottom:14px; left:14px; transform:scaleY(-1); }
+        .brk-br { bottom:14px; right:14px; transform:scale(-1,-1); }
+        @media(max-width:420px){ .brk{display:none;} }
+
+        .card {
+            position:relative; z-index:10;
+            width:min(94vw,576px);
+            max-height:calc(100svh - 28px);
+            overflow-y:auto; overflow-x:hidden;
+            -webkit-overflow-scrolling:touch;
+            scrollbar-width:none;
+            background:var(--cbg);
+            backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+            border:1px solid rgba(0,255,65,0.65);
+            border-radius:3px;
+            padding:clamp(16px,5vw,42px);
+            box-shadow:0 0 0 1px rgba(0,255,65,.06),0 0 50px rgba(0,0,0,.97),0 0 40px rgba(0,255,65,.06),inset 0 0 24px rgba(0,255,65,.03);
+            display:flex; flex-direction:column;
+            gap:clamp(12px,3vw,24px);
+            animation:bootUp .85s cubic-bezier(.16,1,.3,1) both;
+        }
+        .card::-webkit-scrollbar{display:none;}
+        .card::before {
+            content:''; position:absolute; top:0; left:8%; right:8%; height:2px;
+            background:linear-gradient(90deg,transparent,var(--gb),transparent);
+            box-shadow:0 0 18px var(--gg),0 0 36px var(--gg); pointer-events:none;
+        }
+        .card::after {
+            content:''; position:absolute; top:-1px; right:-1px;
+            width:20px; height:20px; background:var(--bg);
+            clip-path:polygon(100% 0,0 0,100% 100%); pointer-events:none;
+        }
+        @keyframes bootUp {
+            0%   {opacity:0;transform:scaleY(.05) scaleX(.96);filter:brightness(5);}
+            45%  {opacity:1;transform:scaleY(1.01) scaleX(.995);filter:brightness(1.4);}
+            100% {opacity:1;transform:scale(1);filter:brightness(1);}
         }
 
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            opacity: 0.85;
-            pointer-events: none;
+        .hdr {
+            display:flex; justify-content:space-between; align-items:center;
+            font-size:clamp(9px,2.2vw,11px); color:rgba(0,255,65,.65);
+            border-bottom:1px solid rgba(0,255,65,.16);
+            padding-bottom:10px;
+            text-transform:uppercase; letter-spacing:1.5px; flex-shrink:0;
+        }
+        .dot {
+            display:inline-block; width:6px; height:6px; border-radius:50%;
+            background:var(--gb); box-shadow:0 0 8px var(--gb);
+            margin-right:7px; vertical-align:middle;
+            animation:blink 1.4s ease-in-out infinite;
+        }
+        @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+        #status {
+            color:var(--gb); font-size:clamp(9px,2.2vw,11px); transition:opacity .3s;
         }
 
-        .vignette {
-            position: fixed; inset: 0;
-            background: radial-gradient(ellipse at 50% 40%, transparent 25%, #000 90%);
-            z-index: 2; pointer-events: none;
-        }
-        .scanlines {
-            position: fixed; inset: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0,0,0,0.18) 2px,
-                rgba(0,0,0,0.18) 4px
-            );
-            z-index: 3; pointer-events: none;
-        }
-
-        .main-frame {
-            position: relative; z-index: 10;
-            width: 94%; max-width: 740px;
-            max-height: 95dvh;
-            background: rgba(0,0,0,0.97);
-            border: 1px solid rgba(0,255,65,0.5);
-            padding: var(--pad);
-            box-shadow:
-                0 0 0 1px rgba(0,255,65,0.08),
-                0 0 40px rgba(0,255,65,0.12),
-                inset 0 0 60px rgba(0,255,65,0.02);
-            overflow-y: auto;
-            scrollbar-width: none;
-            will-change: transform;
-        }
-        .main-frame::-webkit-scrollbar { display: none; }
-
-        .main-frame::before,
-        .main-frame::after {
-            content: '';
-            position: absolute;
-            width: 16px; height: 16px;
-            border-color: var(--neon);
-            border-style: solid;
-        }
-        .main-frame::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-        .main-frame::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-
-        .header-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            font-size: clamp(9px, 2.2vw, 11px);
-            border-bottom: 1px solid rgba(0,255,65,0.2);
-            padding-bottom: 12px;
-            margin-bottom: 22px;
-            letter-spacing: 1.5px;
-            opacity: 0.75;
-        }
-        #st { color: var(--neon); opacity: 1; min-width: 120px; text-align: right; }
-
+        .title-wrap { text-align:center; flex-shrink:0; }
         h1 {
-            font-size: clamp(2.8rem, 14vw, 5rem);
-            text-align: center;
-            letter-spacing: clamp(6px, 3vw, 18px);
-            margin-bottom: 28px;
-            text-shadow: 0 0 8px var(--neon), 0 0 30px rgba(0,255,65,0.4);
-            animation: flicker 6s infinite;
-            will-change: opacity;
+            font-family:'Orbitron',monospace; font-weight:900;
+            font-size:clamp(2.6rem,12vw,5.4rem);
+            letter-spacing:clamp(6px,3vw,22px);
+            color:#fff; line-height:1;
+            text-shadow:0 0 10px var(--g),0 0 28px var(--gg),0 0 70px rgba(0,255,65,.18);
+            animation:glitch 9s infinite;
+        }
+        @keyframes glitch {
+            0%,93%,100%{text-shadow:0 0 10px var(--g),0 0 28px var(--gg),0 0 70px rgba(0,255,65,.18);transform:none;}
+            94%{text-shadow:-3px 0 var(--cy),3px 0 #ff003c,0 0 28px var(--gg);transform:skewX(-1.5deg);}
+            95%{text-shadow:3px 0 var(--cy),-3px 0 #ff003c,0 0 28px var(--gg);transform:skewX(1.5deg);}
+            96%{text-shadow:0 0 10px var(--g),0 0 28px var(--gg);transform:none;}
+            97%{text-shadow:-2px 0 #ff003c,2px 0 var(--cy),0 0 28px var(--gg);transform:translate(1px,-1px);}
+            98%{text-shadow:0 0 10px var(--g),0 0 28px var(--gg);transform:none;}
+        }
+        .bio-tag {
+            font-family:'Orbitron',monospace; font-weight:700;
+            font-size:clamp(10px,2.6vw,13px);
+            color:var(--gb); letter-spacing:7px;
+            text-shadow:0 0 12px var(--gg); margin-top:7px;
         }
 
-        @keyframes flicker {
-            0%,92%,96%,100% { opacity: 1; }
-            93%   { opacity: 0.85; }
-            95%   { opacity: 0.6; }
-            97%   { opacity: 0.9; }
+        .cmd {
+            border-left:2px solid; border-image:linear-gradient(to bottom,var(--gb),var(--cy)) 1;
+            padding:clamp(8px,2.5vw,14px) 0 clamp(8px,2.5vw,14px) clamp(12px,3.5vw,20px);
+            background:linear-gradient(90deg,rgba(0,255,65,.055) 0%,transparent 85%);
+            flex-shrink:0;
+        }
+        .cmd p { font-size:clamp(11px,2.8vw,14px); line-height:1.8; color:#c8ffc8; }
+        .g  { color:var(--gb); font-weight:bold; text-shadow:0 0 5px var(--gg); }
+        .c  { color:var(--cy); font-weight:bold; text-shadow:0 0 5px var(--cyg); }
+        .dim{ color:rgba(0,229,255,.5); font-size:.85em; }
+
+        .stats {
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:clamp(10px,2.5vw,18px); flex-shrink:0;
+        }
+        @media(max-width:380px){ .stats{grid-template-columns:1fr;} }
+        .stat { font-size:clamp(9px,2.2vw,11px); text-transform:uppercase; letter-spacing:.4px; color:rgba(0,255,65,.72); }
+        .stat-row { display:flex; justify-content:space-between; margin-bottom:5px; }
+        .stat-pct { color:var(--gb); }
+        .track {
+            width:100%; height:4px;
+            background:rgba(0,255,65,.06);
+            border:1px solid rgba(0,255,65,.14);
+            border-radius:2px; overflow:hidden;
+        }
+        .fill {
+            height:100%; border-radius:2px;
+            background:linear-gradient(90deg,var(--g),#c8ffc8);
+            box-shadow:0 0 8px var(--gg);
+            transform-origin:left; transform:scaleX(0);
+            animation:fillBar 1.4s cubic-bezier(.16,1,.3,1) forwards;
+        }
+        @keyframes fillBar{ to{transform:scaleX(1);} }
+
+        .divider {
+            display:flex; align-items:center; gap:10px;
+            font-size:9px; letter-spacing:4px; color:rgba(0,255,65,.28); flex-shrink:0;
+        }
+        .divider::before,.divider::after {
+            content:''; flex:1; height:1px;
+            background:linear-gradient(90deg,transparent,rgba(0,255,65,.22),transparent);
         }
 
-        .terminal-box {
-            border-left: 2px solid var(--neon);
-            padding: 14px 18px;
-            margin-bottom: 28px;
-            background: var(--neon-faint);
-            position: relative;
+        .btns {
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:clamp(8px,2.5vw,14px); flex-shrink:0;
         }
-        .terminal-box::before {
-            content: 'PROFILE.SYS';
-            position: absolute;
-            top: -9px; left: 14px;
-            font-size: 9px;
-            background: #010101;
-            padding: 0 6px;
-            letter-spacing: 2px;
-            opacity: 0.6;
-        }
-        .terminal-box p {
-            font-size: clamp(0.85rem, 3.5vw, 1.1rem);
-            line-height: 1.75;
-            margin-bottom: 4px;
-        }
-
-        .hl {
-            background: var(--neon);
-            color: #000;
-            padding: 1px 6px;
-            font-weight: bold;
-        }
-
-        .skills-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px 30px;
-            margin-bottom: 30px;
-        }
-
-        .skill-item { font-size: clamp(9px, 2.5vw, 11px); letter-spacing: 1px; text-transform: uppercase; }
-        .skill-label { display: flex; justify-content: space-between; margin-bottom: 7px; }
-        .skill-pct { opacity: 0.5; font-size: 10px; }
-
-        .bar-bg {
-            width: 100%; height: 5px;
-            background: rgba(0,255,65,0.08);
-            border: 1px solid rgba(0,255,65,0.18);
-            overflow: hidden;
-        }
-        .bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, rgba(0,255,65,0.6), var(--neon));
-            box-shadow: 0 0 10px var(--neon);
-            transform: scaleX(0);
-            transform-origin: left;
-            animation: barGrow 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
-            will-change: transform;
-        }
-        @keyframes barGrow { to { transform: scaleX(1); } }
-
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media(max-width:300px){ .btns{grid-template-columns:1fr;} }
 
         .btn {
-            text-decoration: none;
-            color: var(--neon);
-            border: 1px solid rgba(0,255,65,0.45);
-            padding: clamp(12px, 3.5vw, 18px) 10px;
-            text-align: center;
-            font-size: clamp(12px, 3vw, 14px);
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.25s ease;
+            display:flex; align-items:center; justify-content:center; gap:7px;
+            text-decoration:none; color:#fff;
+            font-family:'Orbitron',monospace;
+            font-size:clamp(10px,2.6vw,12px); font-weight:700;
+            letter-spacing:2px; text-transform:uppercase;
+            padding:clamp(13px,3.5vw,19px) 10px;
+            border:1px solid rgba(0,255,65,.48); border-radius:2px;
+            background:rgba(0,255,65,.07);
+            position:relative; overflow:hidden;
+            touch-action:manipulation; cursor:pointer;
+            -webkit-tap-highlight-color:transparent;
+            transition:color .22s,background .22s,border-color .22s,box-shadow .22s;
         }
         .btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--neon);
-            transform: translateX(-105%);
-            transition: transform 0.3s ease;
-            z-index: 0;
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+            transform:translateX(-100%); transition:transform .4s;
         }
-        .btn span { position: relative; z-index: 1; }
-        .btn:hover { color: #000; border-color: var(--neon); box-shadow: 0 0 20px rgba(0,255,65,0.4); }
-        .btn:hover::before { transform: translateX(0); }
-
-        .footer-line {
-            margin-top: 22px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(0,255,65,0.12);
-            font-size: 9px;
-            letter-spacing: 2px;
-            opacity: 0.3;
-            text-align: center;
+        .btn::after {
+            content:''; position:absolute; bottom:0; right:0;
+            border-style:solid; border-width:0 0 8px 8px;
+            border-color:transparent transparent rgba(0,255,65,.45) transparent;
         }
+        @media(hover:hover) and (pointer:fine){
+            .btn:hover { background:var(--gb); border-color:var(--gb); color:#000; box-shadow:0 0 28px var(--gg),0 0 56px rgba(0,255,65,.12); }
+            .btn:hover::before { transform:translateX(100%); }
+            .btn:hover::after  { border-color:transparent transparent rgba(0,0,0,.4) transparent; }
+            .btn-tg:hover { background:var(--cy); border-color:var(--cy); box-shadow:0 0 28px var(--cyg),0 0 56px rgba(0,229,255,.1); }
+        }
+        .btn:active {
+            transform:scale(0.93);
+            background:rgba(255,255,255,.92);
+            color:#000; border-color:#fff;
+            transition:transform .07s,background .07s,color .07s;
+        }
+        .btn-tg { border-color:rgba(0,210,220,.4); }
+        .btn-tg::after { border-color:transparent transparent rgba(0,210,220,.4) transparent; }
+        .ico { font-size:1em; line-height:1; }
 
-        @media (max-width: 500px) {
-            .skills-container, .action-btns { grid-template-columns: 1fr; }
-            h1 { letter-spacing: 8px; margin-bottom: 20px; }
+        .foot {
+            font-size:clamp(8px,1.8vw,10px);
+            color:rgba(0,255,65,.22);
+            text-align:center; letter-spacing:2px;
+            text-transform:uppercase; flex-shrink:0;
         }
     </style>
 </head>
-<body oncontextmenu="return false;" onkeydown="return false;">
+<body oncontextmenu="return false;">
 
-<canvas id="bg-canvas" aria-hidden="true"></canvas>
-<div class="vignette" aria-hidden="true"></div>
-<div class="scanlines" aria-hidden="true"></div>
+    <canvas id="matrix"></canvas>
+    <div class="scan" aria-hidden="true"></div>
 
-<main class="main-frame">
-    <div class="header-info">
-        <span>LOC: BAKU, AZERBAIJAN</span>
-        <span id="st">STATUS: ROOT_ACTIVE</span>
-    </div>
+    <div class="brk brk-tl" aria-hidden="true"></div>
+    <div class="brk brk-tr" aria-hidden="true"></div>
+    <div class="brk brk-bl" aria-hidden="true"></div>
+    <div class="brk brk-br" aria-hidden="true"></div>
 
-    <h1>M1CRO</h1>
-
-    <div class="terminal-box">
-        <p>> Создаю полезное ПО и вредоносное ПО.</p>
-        <p>> Программирую на <span class="hl">Python</span> и <span class="hl">Batch</span>.</p>
-        <p>> Уверенный пользователь: <span class="hl">Windows, Linux, iOS, Android</span>.</p>
-    </div>
-
-    <div class="skills-container">
-        <div class="skill-item">
-            <div class="skill-label"><span>Прошивка устройств</span><span class="skill-pct">100%</span></div>
-            <div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div>
+    <main class="card">
+        <div class="hdr">
+            <span><span class="dot"></span>AZ // BAKU</span>
+            <span id="status">CORE_STABLE</span>
         </div>
-        <div class="skill-item">
-            <div class="skill-label"><span>Работа с ОС</span><span class="skill-pct">96%</span></div>
-            <div class="bar-bg"><div class="bar-fill" style="width:96%"></div></div>
-        </div>
-        <div class="skill-item">
-            <div class="skill-label"><span>Кодинг (Py / Batch)</span><span class="skill-pct">92%</span></div>
-            <div class="bar-bg"><div class="bar-fill" style="width:92%"></div></div>
-        </div>
-        <div class="skill-item">
-            <div class="skill-label"><span>Анализ защиты</span><span class="skill-pct">88%</span></div>
-            <div class="bar-bg"><div class="bar-fill" style="width:88%"></div></div>
-        </div>
-    </div>
 
-    <div class="action-btns">
-        <a href="https://t.me/M1croOfficial" target="_blank" rel="noopener noreferrer" class="btn"><span>Telegram</span></a>
-        <a href="https://www.tiktok.com/@m1crotg" target="_blank" rel="noopener noreferrer" class="btn"><span>TikTok</span></a>
-    </div>
+        <div class="title-wrap">
+            <h1>M1CRO</h1>
+            <div class="bio-tag">&#9670; &nbsp;B I O &nbsp;&#9670;</div>
+        </div>
 
-    <div class="footer-line">[ ENCRYPTED · SECURE · v2.1 ]</div>
-</main>
+        <div class="cmd">
+            <p>&gt; Создаю <span class="g">Вредоносное ПО</span> &amp; <span class="g">Полезное ПО</span></p>
+            <p>&gt; Языки на которых я пишу код: <span class="c">Python / Batch</span></p>
+            <p>&gt; Платформы: <span class="g">Win / Lin / iOS / Android</span></p>
+            <p>&gt; <span class="dim">При создании использую ИИ</span></p>
+        </div>
 
-<script>
-    (function() {
-        /* 1. Защита от F12, Ctrl+Shift+I, Ctrl+U */
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode == 123 || 
-                (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
-                (e.ctrlKey && e.keyCode == 85)) {
-                e.preventDefault();
-                return false;
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-row"><span>Прошивка устройств</span><span class="stat-pct">89%</span></div>
+                <div class="track"><div class="fill" style="width:89%;animation-delay:.25s"></div></div>
+            </div>
+            <div class="stat">
+                <div class="stat-row"><span>Работа с ОС</span><span class="stat-pct">97%</span></div>
+                <div class="track"><div class="fill" style="width:97%;animation-delay:.4s"></div></div>
+            </div>
+            <div class="stat">
+                <div class="stat-row"><span>Кодинг (Py / Batch)</span><span class="stat-pct">95%</span></div>
+                <div class="track"><div class="fill" style="width:95%;animation-delay:.55s"></div></div>
+            </div>
+            <div class="stat">
+                <div class="stat-row"><span>Анализ защиты</span><span class="stat-pct">91%</span></div>
+                <div class="track"><div class="fill" style="width:91%;animation-delay:.7s"></div></div>
+            </div>
+        </div>
+
+        <div class="divider">CONNECT</div>
+
+        <nav class="btns">
+            <a href="https://t.me/M1croOfficial" target="_blank" rel="noopener noreferrer" class="btn btn-tg">
+                <span class="ico">&#9992;</span>Telegram
+            </a>
+            <a href="https://www.tiktok.com/@m1crotg" target="_blank" rel="noopener noreferrer" class="btn">
+                <span class="ico">&#9834;</span>TikTok
+            </a>
+        </nav>
+
+        <div class="foot" id="clock">SYS::BAKU --:--:--</div>
+    </main>
+
+    <script>
+    (function(){
+        'use strict';
+
+        /* SECURITY */
+        document.addEventListener('keydown', function(e){
+            if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&'IJC'.includes(e.key))||(e.ctrlKey&&'US'.includes(e.key))){
+                e.preventDefault(); e.stopPropagation();
             }
-        });
+        }, true);
 
-        /* 2. Зацикленный дебаггер (мешает копаться в коде через консоль) */
-        setInterval(function() {
-            (function(i) {
-                return (function(a) {
-                    return (function(b) {
-                        return (function(c) {
-                            debugger;
-                        })(a);
-                    })(i);
-                })(i);
-            })(0);
-        }, 1000);
+        /* CONSOLE LOCK — safe, no crash */
+        setInterval(function(){
+            try{ console.clear(); }catch(e){}
+            try{
+                console.log('%c\u26a0 SYSTEM SECURED','color:#00ff41;font-size:20px;font-weight:bold;');
+                console.log('%cAccess denied.','color:#39ff14;font-size:11px;');
+            }catch(e){}
+        }, 2500);
 
-        /* 3. Очистка консоли при открытии */
-        setInterval(() => {
-            console.clear();
-            console.log("%cSTOP!", "color: red; font-size: 40px; font-weight: bold;");
-            console.log("%cProtected by M1CRO System", "color: #00ff41; font-size: 18px;");
-        }, 1500);
+        /* MATRIX RAIN */
+        var cv  = document.getElementById('matrix');
+        var ctx = cv.getContext('2d');
+        var CH  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>|{}[]01';
+        var cols, drops, fs;
 
-        /* ── Логика сайта ── */
-        const st = document.getElementById('st');
-        const logs = ["STATUS: ROOT_ACTIVE","SYSTEM: SECURE","USER: M1CRO","ACCESS: GRANTED"];
-        let idx = 0;
-        function rotateSt() {
-            st.style.opacity = '0';
-            setTimeout(() => {
-                idx = (idx + 1) % logs.length;
-                st.textContent = logs[idx];
-                st.style.opacity = '1';
-            }, 250);
+        function init(){
+            fs       = window.innerWidth < 480 ? 11 : 14;
+            cv.width = window.innerWidth;
+            cv.height= window.innerHeight;
+            cols = Math.ceil(cv.width / fs) + 1;
+            drops = [];
+            for(var i=0;i<cols;i++) drops[i] = Math.random()*-60;
         }
-        setInterval(rotateSt, 3000);
 
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d', { alpha: false });
-        const CHARS = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ#$%&<>[]{}ABCDEF'.split('');
-        const COL_W = 20;
-        let cols, drops;
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            cols = Math.floor(canvas.width / COL_W);
-            drops = Array(cols).fill(1).map(() => Math.random() * -50);
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function draw() {
-            ctx.fillStyle = 'rgba(1, 1, 1, 0.15)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = '14px "Share Tech Mono"';
-            for (let i = 0; i < drops.length; i++) {
-                const text = CHARS[Math.floor(Math.random() * CHARS.length)];
-                const x = i * COL_W;
-                const y = drops[i] * COL_W;
-                ctx.fillStyle = '#00ff41';
-                if (Math.random() > 0.95) ctx.fillStyle = '#fff';
-                ctx.fillText(text, x, y);
-                if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
+        function draw(){
+            ctx.fillStyle='rgba(1,8,1,0.052)';
+            ctx.fillRect(0,0,cv.width,cv.height);
+            ctx.font = fs+"px 'Share Tech Mono',monospace";
+            for(var i=0;i<cols;i++){
+                var y  = drops[i]*fs;
+                var ch = CH[Math.floor(Math.random()*CH.length)];
+                ctx.fillStyle='#b8ffb8';
+                ctx.fillText(ch, i*fs, y);
+                ctx.fillStyle='rgba(0,195,50,0.42)';
+                ctx.fillText(CH[Math.floor(Math.random()*CH.length)], i*fs, y-fs*2);
+                if(y>cv.height && Math.random()>0.975) drops[i]=0;
+                drops[i] += 0.42 + Math.random()*0.28;
             }
         }
-        setInterval(draw, 50);
-    })();
-</script>
+
+        init();
+        (function loop(){ draw(); requestAnimationFrame(loop); })();
+
+        var rt;
+        function onResize(){ clearTimeout(rt); rt=setTimeout(init,180); }
+        window.addEventListener('resize', onResize);
+        window.addEventListener('orientationchange', function(){ clearTimeout(rt); rt=setTimeout(init,320); });
+
+        /* STATUS TICKER */
+        var st  = document.getElementById('status');
+        var STA = ['CORE: ONLINE','NETWORK: ENCRYPTED','USER: M1CRO','ACCESS: GRANTED','LOCATION: BAKU'];
+        var si  = 0;
+        setInterval(function(){
+            st.style.opacity='0';
+            setTimeout(function(){ si=(si+1)%STA.length; st.textContent=STA[si]; st.style.opacity='1'; },320);
+        },4000);
+
+        /* CLOCK */
+        var cl = document.getElementById('clock');
+        function tick(){
+            var n=new Date();
+            var p=function(x){return String(x).padStart(2,'0');};
+            cl.textContent='SYS::BAKU '+p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());
+        }
+        tick();
+        setInterval(tick,1000);
+
+    }());
+    </script>
 </body>
 </html>
